@@ -104,14 +104,6 @@ button.danger{color:var(--bad)}
 .card.c-blue .tx{background:var(--c-blue);color:var(--t-blue)}.card.c-green .tx{background:var(--c-green);color:var(--t-green)}.card.c-yellow .tx{background:var(--c-yellow);color:var(--t-yellow)}
 .card.c-orange .tx{background:var(--c-orange);color:var(--t-orange)}.card.c-red .tx{background:var(--c-red);color:var(--t-red)}.card.c-purple .tx{background:var(--c-purple);color:var(--t-purple)}
 .lempty{padding:28px 10px;text-align:center;color:var(--ink3);font-size:13px;position:relative;z-index:1;background:var(--panel)}
-.ed.help{width:min(600px,100%)}
-.hbody{display:flex;flex-direction:column;gap:14px;-webkit-overflow-scrolling:touch}
-.ed.help{max-height:92%}
-.ed.help .act{position:sticky;bottom:-18px;background:var(--panel);padding:10px 0 4px;margin-bottom:-4px}
-.hbody section h4{margin:0 0 6px;font-size:14px;font-weight:800;color:var(--ink)}
-.hbody ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:5px}
-.hbody li{font-size:13.5px;line-height:1.55;color:var(--ink2)}
-.hbody li b{color:var(--ink);font-weight:700}
 .ed select{border:1px solid var(--line);border-radius:12px;padding:9px 12px;background:var(--panel2);width:100%;color:var(--ink)}
 /* ---------- 보드 ---------- */
 .wrap{overflow:auto;position:relative;margin:0;max-height:70vh;background:var(--panel);border-radius:18px;box-shadow:var(--shadow)}
@@ -166,6 +158,17 @@ button.danger{color:var(--bad)}
 .rmenu button.danger{color:var(--bad)}
 .rmenu button small{display:block;font-size:11px;color:var(--ink3);font-weight:400}
 
+/* ---------- 화면 안내(코치마크) ---------- */
+.tour{position:fixed;inset:0;z-index:80}
+.tour[hidden]{display:none!important}
+.tour .hole{position:absolute;border-radius:12px;box-shadow:0 0 0 9999px rgba(30,28,24,.62);pointer-events:none;transition:all .25s ease;outline:2px solid var(--acc2)}
+.tour .tip{position:absolute;background:var(--panel);border-radius:14px;box-shadow:var(--pop);padding:14px 16px;width:min(320px,calc(100vw - 32px));font-size:14px;line-height:1.5;color:var(--ink);transition:top .25s ease,left .25s ease}
+.tour .tip .st{font-size:11px;color:var(--ink3);margin-bottom:4px}
+.tour .tip b{display:block;font-size:15px;margin-bottom:4px}
+.tour .tip .act{display:flex;gap:8px;justify-content:flex-end;margin-top:12px;align-items:center}
+.tour .tip .skip{margin-right:auto;border:none;background:none;color:var(--ink3);padding:6px 4px;text-decoration:underline}
+.tour .tip .act button{padding:7px 14px}
+@media (prefers-reduced-motion:reduce){.tour .hole,.tour .tip{transition:none}}
 /* ---------- 편집기 ---------- */
 .ovl{position:fixed;inset:0;background:rgba(43,43,43,.32);z-index:50;display:flex;align-items:flex-end;justify-content:center;padding:0}
 .ovl[hidden]{display:none!important}
@@ -210,13 +213,13 @@ button.danger{color:var(--bad)}
  <span class="brand">일정표 빌더</span>
  <button id="btnAdd" type="button" class="pri">표 추가</button>
  <button id="btnXlsAll" type="button">엑셀 저장</button>
- <button id="btnHelp" type="button">사용법</button>
  <button id="btnMore" type="button" class="moreBtn" aria-expanded="false">더보기</button>
  <div class="more" id="gMore">
   <button id="btnXlsIn" type="button">엑셀 불러오기</button>
   <button id="btnJson" type="button">파일 저장</button>
   <button id="btnJsonIn" type="button">파일 불러오기</button>
   <button id="btnPrint" type="button">인쇄</button>
+  <button id="btnTour" type="button">화면 안내 보기</button>
  </div>
  <input id="fileXls" type="file" accept=".xlsx" hidden>
  <input id="fileJson" type="file" accept=".json,application/json" hidden>
@@ -277,37 +280,11 @@ button.danger{color:var(--bad)}
   </div>
  </div>
 </div>
-<div class="ovl" id="hovl" hidden>
- <div class="ed help" role="dialog" aria-modal="true" aria-labelledby="hTitle">
-  <h3 id="hTitle">사용법 <span>일정표 빌더</span></h3>
-  <div class="hbody">
-   <section><h4>1. 표와 프로젝트명</h4>
-    <ul><li>표 하나가 프로젝트 하나입니다. 맨 위 <b>프로젝트명 입력</b>을 눌러 이름을 적습니다. 언제든 다시 눌러 고칠 수 있습니다.</li>
-    <li><b>표 추가</b>는 빈 표를 아래에 만들고, 표 안의 <b>복제</b>는 같은 내용의 표를 바로 아래에 만듭니다.</li>
-    <li><b>기간</b> 버튼을 누르면 표에 표시할 시작 월과 종료 월을 고릅니다.</li></ul></section>
-   <section><h4>2. 항목(행)</h4>
-    <ul><li>왼쪽 <b>항목명</b> 칸을 눌러 이름을 적습니다. 예) 그리퍼 핑거, 수도공사</li>
-    <li>행 앞 <b>번호</b>를 누르면 위로 이동, 아래로 이동, 아래에 행 추가, 행 삭제가 나옵니다.</li>
-    <li>행이 모자라면 <b>행 추가</b>를 누릅니다.</li></ul></section>
-   <section><h4>3. 일정 입력</h4>
-    <ul><li><b>하루 일정</b>: 날짜 칸을 한 번 누르고 내용을 적습니다. 예) 발주 완료, 납기 예정일</li>
-    <li><b>기간 일정</b>: 시작 칸에서 끝 칸까지 <b>끌어서</b> 놓으면 날짜가 채워집니다. 휴대폰에서는 칸을 <b>잠깐 길게 누른 뒤</b> 끕니다. 입력창에서 종료일을 직접 적어도 됩니다.</li>
-    <li>색상을 고르면 알약 색이 바뀝니다. 납기는 주황, 완료는 초록처럼 규칙을 정해 두면 한눈에 들어옵니다.</li>
-    <li>이미 있는 일정을 누르면 고치거나 지울 수 있습니다.</li>
-    <li>휴대폰의 목록 화면에서는 <b>일정 추가</b>를 누르고 항목을 고른 뒤 적습니다.</li></ul></section>
-   <section><h4>4. 보기 방식</h4>
-    <ul><li>PC는 가로 표, 휴대폰은 날짜순 목록이 기본입니다. <b>목록 보기 / 표 보기</b>로 바꿀 수 있고 표마다 기억됩니다.</li>
-    <li><b>오늘</b>을 누르면 오늘 날짜로 이동합니다. 주말은 옅은 색, 오늘은 검정 배지로 표시됩니다.</li></ul></section>
-   <section><h4>5. 공유</h4>
-    <ul><li><b>링크로 보내기</b>: 받는 사람이 링크를 열면 같은 표가 자기 화면에 추가됩니다. 복사본이라 상대가 고쳐도 내 표는 그대로입니다.</li>
-    <li><b>표 이미지 / 목록 이미지</b>: 그림으로 만들어 카톡 등으로 보냅니다. 휴대폰에서는 공유창이 바로 뜹니다.</li></ul></section>
-   <section><h4>6. 저장과 백업</h4>
-    <ul><li>입력하면 이 기기의 브라우저에 <b>자동 저장</b>됩니다. 다른 기기에는 자동으로 넘어가지 않습니다.</li>
-    <li><b>파일 저장</b>으로 모든 표를 한 파일로 내려받고, 다른 기기에서 <b>파일 불러오기</b>로 그대로 복원합니다. 색상과 표 여러 개가 모두 보존됩니다.</li>
-    <li><b>엑셀 저장</b>은 표마다 시트 하나로 엑셀 파일을 만듭니다. <b>엑셀 불러오기</b>는 같은 모양의 엑셀 일정표를 새 표로 읽어 옵니다.</li>
-    <li>브라우저 데이터를 지우면 자동 저장된 내용도 사라지니, 중요한 표는 가끔 파일로 저장해 두세요.</li></ul></section>
-  </div>
-  <div class="act"><button id="hClose" type="button" class="pri">닫기</button></div>
+<div class="tour" id="tour" hidden aria-live="polite">
+ <div class="hole" id="tHole"></div>
+ <div class="tip" id="tTip" role="dialog" aria-modal="true">
+  <div class="st" id="tStep"></div><b id="tTitle"></b><div id="tText"></div>
+  <div class="act"><button type="button" class="skip" id="tSkip">건너뛰기</button><button type="button" id="tPrev">이전</button><button type="button" class="pri" id="tNext">다음</button></div>
  </div>
 </div>
 <div class="ovl" id="rovl" hidden>
@@ -588,7 +565,6 @@ $('edSave').onclick=saveEditor; $('edCancel').onclick=closeEditor; $('edDelete')
 $('ovl').addEventListener('click',e=>{if(e.target===$('ovl'))closeEditor();});
 document.addEventListener('keydown',e=>{
  if(e.key==='Escape')closeRowMenu();
- if(e.key==='Escape'&&!$('hovl').hidden){$('hovl').hidden=true;}
  if(e.key==='Escape'&&!$('rovl').hidden){$('rovl').hidden=true;RB=null;}
  if($('ovl').hidden)return;
  if(e.key==='Escape')closeEditor();
@@ -598,9 +574,7 @@ document.addEventListener('keydown',e=>{
 /* ===================== 상단 바 ===================== */
 function addBoard(b,msg){DOC.boards.push(b);persist();const el=makeBoard(b);$('boards').appendChild(el);el.scrollIntoView({behavior:'smooth',block:'start'});const t=el.querySelector('.title');setTimeout(()=>t.focus(),300);if(msg!==false)toast(msg||'새 표가 추가됐습니다. 프로젝트명을 입력하세요');}
 $('btnMore').onclick=()=>{const o=$('gMore').classList.toggle('open');$('btnMore').setAttribute('aria-expanded',o);$('btnMore').textContent=o?'접기':'더보기';};
-$('btnHelp').onclick=()=>{$('hovl').hidden=false;$('hClose').focus();};
-$('hClose').onclick=()=>{$('hovl').hidden=true;};
-$('hovl').addEventListener('click',e=>{if(e.target===$('hovl'))$('hovl').hidden=true;});
+$('btnTour').onclick=()=>{$('gMore').classList.remove('open');startTour();};
 $('btnAdd').onclick=()=>addBoard(blank()); $('btnAdd2').onclick=()=>addBoard(blank());
 $('btnPrint').onclick=()=>window.print();
 $('btnJson').onclick=()=>download(new Blob([JSON.stringify(DOC,null,1)],{type:'application/json'}),'일정표 저장파일.json');
@@ -936,9 +910,51 @@ async function shareImage(S,kind){
  }catch(err){console.error(err);toast('이미지를 만들지 못했습니다: '+err.message);}
 }
 
+/* ===================== 화면 안내(코치마크) ===================== */
+const TOUR={i:0,steps:[],target:null};
+function tourSteps(){
+ const board=document.querySelector('.board'); const q=sel=>board?board.querySelector(sel):null; const list=board&&viewOf(DOC.boards[0])==='list';
+ const steps=[
+  {el:q('.title'),title:'프로젝트명',text:'여기를 눌러 프로젝트 이름을 적습니다. 언제든 다시 눌러 고칠 수 있습니다.'},
+  {el:q('.bRange'),title:'기간',text:'표에 보여줄 시작 월과 종료 월을 정합니다.'},
+ ];
+ if(list){
+  steps.push({el:q('.bAddItem'),title:'일정 추가',text:'항목을 고르고 날짜와 내용을 적으면 목록에 들어갑니다. 이미 있는 일정은 카드를 눌러 고칩니다.'});
+  steps.push({el:q('.bView'),title:'표 보기',text:'표로 바꾸면 항목 이름을 적고, 날짜 칸을 눌러 바로 입력할 수 있습니다. 칸을 길게 누른 뒤 끌면 기간 일정이 됩니다.'});
+ }else{
+  steps.push({el:q('.name input'),title:'항목명',text:'행마다 항목 이름을 적습니다. 예) 그리퍼 핑거, 수도공사'});
+  steps.push({el:q('.d[data-date="'+todayStr+'"]')||q('.d'),title:'날짜 칸',text:'칸을 한 번 누르면 하루 일정, 옆으로 끌어서 놓으면 기간 일정이 됩니다. 이미 적힌 일정은 눌러서 고칩니다.',row:true});
+  steps.push({el:q('.no'),title:'행 관리',text:'번호를 누르면 위아래 이동, 행 추가, 행 삭제가 나옵니다.'});
+ }
+ steps.push({el:q('.bShare'),title:'공유',text:'링크나 이미지로 다른 사람에게 보냅니다.'});
+ steps.push({el:$('btnAdd'),title:'표 추가',text:'프로젝트가 더 있으면 표를 아래에 추가합니다. 표 안의 복제를 누르면 같은 내용으로 하나 더 만듭니다.'});
+ steps.push({el:isPhone()?$('btnMore'):$('btnJson'),title:isPhone()?'더보기':'파일 저장',text:'입력한 내용은 이 기기에 자동 저장됩니다. 다른 기기로 옮기거나 백업하려면 '+(isPhone()?'더보기 안의 ':'')+'파일 저장을 쓰세요.'});
+ return steps.filter(st=>st.el&&st.el.offsetParent!==null);
+}
+function startTour(){
+ closeRowMenu(); TOUR.steps=tourSteps(); if(!TOUR.steps.length)return; TOUR.i=0; $('tour').hidden=false; showStep();
+}
+function endTour(){$('tour').hidden=true; ls.set('schb_tour','1'); window.removeEventListener('resize',placeStep);}
+function showStep(){
+ const st=TOUR.steps[TOUR.i]; if(!st){endTour();return;}
+ $('tStep').textContent=(TOUR.i+1)+' / '+TOUR.steps.length; $('tTitle').textContent=st.title; $('tText').textContent=st.text;
+ $('tPrev').hidden=TOUR.i===0; $('tNext').textContent=TOUR.i===TOUR.steps.length-1?'완료':'다음';
+ TOUR.target=st.el; st.el.scrollIntoView({block:'center',inline:'center',behavior:'smooth'});
+ setTimeout(placeStep,320); window.addEventListener('resize',placeStep);
+}
+function placeStep(){
+ const el=TOUR.target; if(!el||$('tour').hidden)return; const r=el.getBoundingClientRect(); const pad=6;
+ const h=$('tHole'); h.style.left=(r.left-pad)+'px'; h.style.top=(r.top-pad)+'px'; h.style.width=(r.width+pad*2)+'px'; h.style.height=(r.height+pad*2)+'px';
+ const tip=$('tTip'); const tw=tip.offsetWidth, th=tip.offsetHeight; const vw=window.innerWidth, vh=window.innerHeight;
+ let top=r.bottom+pad+12; if(top+th>vh-12)top=Math.max(12,r.top-pad-12-th);
+ let left=Math.min(Math.max(16,r.left),vw-tw-16);
+ tip.style.top=top+'px'; tip.style.left=left+'px';
+}
+$('tNext').onclick=()=>{TOUR.i++;showStep();}; $('tPrev').onclick=()=>{TOUR.i=Math.max(0,TOUR.i-1);showStep();}; $('tSkip').onclick=endTour;
+document.addEventListener('keydown',e=>{if($('tour').hidden)return; if(e.key==='Escape')endTour(); if(e.key==='ArrowRight'||e.key==='Enter'){TOUR.i++;showStep();} if(e.key==='ArrowLeft'){TOUR.i=Math.max(0,TOUR.i-1);showStep();}});
 /* ===================== 시작 ===================== */
 load(); renderAll(); receiveShared();
-if(!ls.get('schb_seen')){ls.set('schb_seen','1');setTimeout(()=>toast('처음이시면 위의 "사용법"을 눌러 보세요'),800);}
+if(!ls.get('schb_tour')){setTimeout(()=>startTour(),600);}
 </script>
 </body>
 </html>
