@@ -60,6 +60,51 @@ button.danger{color:var(--bad)}
 .addboard{margin:18px 24px 0;display:flex;gap:10px;align-items:center}
 .addboard button{border-style:dashed;padding:12px 20px;width:100%;justify-content:center;display:flex;color:var(--ink2)}
 
+[hidden]{display:none!important}
+.more{display:contents}
+.moreBtn{display:none}
+.more.open{display:flex;flex-wrap:wrap;gap:8px 10px;align-items:center;width:100%}
+@media (max-width:640px){
+ :root{--cw:30px;--noW:32px;--nameW:120px}
+ .gbar{padding-left:16px;padding-right:16px}
+ .gbar .brand{display:none}
+ .board{margin:12px 12px 0}
+ .addboard{margin:16px 12px 0}
+ .top input[type=text]{font-size:19px}
+ .tools{gap:6px 8px}
+ .tools button{padding:8px 12px;font-size:13px}
+ .moreBtn{display:inline-block}
+ .more{display:none}
+ .more.open{display:flex;padding:8px 0 2px}
+ .bnum{width:100%;margin-left:0}
+ .wrap{max-height:none}
+ .mtabs{gap:4px}.mt{padding:5px 10px;font-size:12px}
+ .addrow .hint{white-space:normal;max-width:70vw}
+ .ed .row{flex-direction:column;align-items:stretch}
+ .tools .f{flex-wrap:wrap}
+ .tools input[type=month]{max-width:150px;padding:6px 8px}
+}
+/* ---------- 목록 보기 ---------- */
+.list{background:var(--panel);border-radius:18px;box-shadow:var(--shadow);padding:10px 12px 14px;position:relative}
+.list[hidden]{display:none!important}
+.list::before{content:"";position:absolute;left:52px;top:14px;bottom:14px;width:2px;background:var(--line2)}
+.lg{display:flex;gap:12px;margin:6px 0;position:relative}
+.ld{width:40px;flex:none;text-align:center;position:relative;z-index:1;padding-top:6px}
+.ld b{display:block;font-size:20px;font-weight:800;color:var(--ink);line-height:1}
+.ld i{font-style:normal;font-size:11px;color:var(--ink3)}
+.ld.sun b,.ld.sun i{color:var(--sun)}.ld.sat b,.ld.sat i{color:var(--sat)}
+.ld em{display:block;font-style:normal;font-size:9.5px;background:var(--acc2);color:#fff;border-radius:99px;margin-top:3px;padding:1px 0}
+.ld.today b{color:#B45309}
+.lc{flex:1;display:flex;flex-direction:column;gap:6px;min-width:0}
+.card{background:var(--panel2);border-radius:12px;padding:9px 12px 9px 14px;border-left:4px solid var(--sw,#CFE3F7);cursor:pointer;text-align:left;width:100%;font:inherit;color:inherit}
+.card:hover{background:var(--line2)}
+.card .nm{font-size:11px;font-weight:700;color:var(--ink2);margin-bottom:2px;display:flex;justify-content:space-between;gap:6px}
+.card .rg{font-weight:500;color:var(--ink3);white-space:nowrap}
+.card .tx{font-size:13.5px;font-weight:500;white-space:pre-wrap;word-break:break-word;display:inline-block;padding:3px 9px;border-radius:8px;background:var(--c-none);color:var(--t-none)}
+.card.c-blue .tx{background:var(--c-blue);color:var(--t-blue)}.card.c-green .tx{background:var(--c-green);color:var(--t-green)}.card.c-yellow .tx{background:var(--c-yellow);color:var(--t-yellow)}
+.card.c-orange .tx{background:var(--c-orange);color:var(--t-orange)}.card.c-red .tx{background:var(--c-red);color:var(--t-red)}.card.c-purple .tx{background:var(--c-purple);color:var(--t-purple)}
+.lempty{padding:28px 10px;text-align:center;color:var(--ink3);font-size:13px;position:relative;z-index:1;background:var(--panel)}
+.ed select{border:1px solid var(--line);border-radius:12px;padding:9px 12px;background:var(--panel2);width:100%;color:var(--ink)}
 /* ---------- 보드 ---------- */
 .wrap{overflow:auto;position:relative;margin:0;max-height:70vh;background:var(--panel);border-radius:18px;box-shadow:var(--shadow)}
 .grid{display:grid;grid-template-columns:var(--noW) var(--nameW) repeat(var(--n),var(--cw));grid-auto-rows:minmax(50px,auto);
@@ -137,7 +182,8 @@ button.danger{color:var(--bad)}
 /* ---------- 인쇄 ---------- */
 @page{size:A3 landscape;margin:10mm}
 @media print{
- .gbar,.tools,.addrow,.addboard,.ovl,.toast,.rmenu,.thint,.mtabs{display:none!important}
+ .gbar,.tools,.addrow,.addboard,.ovl,.toast,.rmenu,.thint,.mtabs,.list{display:none!important}
+ .wrap[hidden]{display:block!important}
  .top input[type=text]{border:none;padding:0;margin:0;font-size:20px}
  .board{margin:0 0 16px;page-break-inside:avoid}
  body{background:#fff;display:block}
@@ -153,11 +199,14 @@ button.danger{color:var(--bad)}
 <div class="gbar">
  <span class="brand">일정표 빌더</span>
  <button id="btnAdd" type="button" class="pri">표 추가</button>
- <button id="btnXlsAll" type="button">엑셀 저장 (전체)</button>
- <button id="btnXlsIn" type="button">엑셀 불러오기</button>
- <button id="btnJson" type="button">파일 저장</button>
- <button id="btnJsonIn" type="button">파일 불러오기</button>
- <button id="btnPrint" type="button">인쇄</button>
+ <button id="btnMore" type="button" class="moreBtn" aria-expanded="false">더보기</button>
+ <div class="more" id="gMore">
+  <button id="btnXlsAll" type="button">엑셀 저장 (전체)</button>
+  <button id="btnXlsIn" type="button">엑셀 불러오기</button>
+  <button id="btnJson" type="button">파일 저장</button>
+  <button id="btnJsonIn" type="button">파일 불러오기</button>
+  <button id="btnPrint" type="button">인쇄</button>
+ </div>
  <input id="fileXls" type="file" accept=".xlsx" hidden>
  <input id="fileJson" type="file" accept=".json,application/json" hidden>
  <span class="status" id="status">자동 저장됨</span>
@@ -174,17 +223,21 @@ button.danger{color:var(--bad)}
    <div class="mtabs" aria-label="월 이동"></div>
   </div>
   <div class="tools">
-   <div class="f"><label>기간</label><input class="start" type="month" aria-label="시작 월"><span class="hint">부터</span><input class="end" type="month" aria-label="종료 월"><span class="hint">까지</span></div>
-   <span class="gap"></span>
-   <button class="bRow" type="button">행 추가</button>
-   <button class="bToday" type="button">오늘</button>
-   <span class="gap"></span>
-   <button class="bXls pri" type="button">엑셀 저장</button>
+   <button class="bAddItem pri" type="button">일정 추가</button>
+   <button class="bView" type="button">목록 보기</button>
    <button class="bShare" type="button">공유</button>
-   <button class="bDup" type="button">복제</button>
-   <button class="bDel danger" type="button">표 삭제</button>
+   <button class="bXls" type="button">엑셀 저장</button>
+   <button class="bMore moreBtn" type="button" aria-expanded="false">더보기</button>
+   <div class="more">
+    <div class="f"><label>기간</label><input class="start" type="month" aria-label="시작 월"><span class="hint">부터</span><input class="end" type="month" aria-label="종료 월"><span class="hint">까지</span></div>
+    <button class="bRow" type="button">행 추가</button>
+    <button class="bToday" type="button">오늘</button>
+    <button class="bDup" type="button">복제</button>
+    <button class="bDel danger" type="button">표 삭제</button>
+   </div>
    <span class="bnum"></span>
   </div>
+  <div class="list" hidden></div>
   <div class="wrap">
    <div class="grid"></div>
    <div class="addrow">
@@ -198,6 +251,7 @@ button.danger{color:var(--bad)}
 <div class="ovl" id="ovl" hidden>
  <div class="ed" role="dialog" aria-modal="true" aria-labelledby="edTitle">
   <h3 id="edTitle">일정 입력 <span id="edTask"></span></h3>
+  <label id="edTaskWrap" hidden>항목<select id="edTaskSel"></select></label>
   <div class="row">
    <label>시작일<input id="edDate" type="date"></label>
    <label>종료일 (비우면 하루)<input id="edEnd" type="date"></label>
@@ -229,6 +283,8 @@ const fmt=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
 const parse=s=>{const [y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d||1);};
 const todayStr=fmt(new Date());
 const $=id=>document.getElementById(id);
+const CW=()=>parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--cw'))||34;
+const isPhone=()=>window.matchMedia('(max-width:640px)').matches;
 
 function blank(){
  const d=new Date(); const st=d.getFullYear()+'-'+pad(d.getMonth()+1); const e=new Date(d.getFullYear(),d.getMonth()+3,1);
@@ -257,7 +313,7 @@ function load(){
  if(!DOC.boards.length)DOC.boards=[blank()];
 }
 let saveT=null;
-function flush(){if(saveT){clearTimeout(saveT);saveT=null;} ls.set(LS_DOC,JSON.stringify(DOC)); status('자동 저장됨 '+new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'}));}
+function flush(){if(saveT){clearTimeout(saveT);saveT=null;} ls.set(LS_DOC,JSON.stringify(DOC,(k,v)=>k==='_lastTask'?undefined:v)); status('자동 저장됨 '+new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'}));}
 function persist(){clearTimeout(saveT); saveT=setTimeout(flush,150);}
 window.addEventListener('pagehide',()=>{if(saveT)flush();});
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&saveT)flush();});
@@ -286,7 +342,10 @@ function makeBoard(S){
  q('.start').addEventListener('change',e=>{const v=e.target.value;if(!v)return;S.start=v;if(S.end<v){S.end=v;q('.end').value=v;}persist();renderGrid(S);});
  q('.end').addEventListener('change',e=>{const v=e.target.value;if(!v)return;S.end=v;if(S.start>v){S.start=v;q('.start').value=v;}persist();renderGrid(S);});
  q('.bRow').onclick=()=>addRow(S); q('.bRow2').onclick=()=>addRow(S);
- q('.bToday').onclick=()=>{if(V[S.id].IDX[todayStr]==null){toast('오늘이 기간 안에 없습니다');return;}scrollToDate(S,todayStr,true);};
+ q('.bMore').onclick=()=>{const m=q('.tools .more');const o=m.classList.toggle('open');q('.bMore').setAttribute('aria-expanded',o);q('.bMore').textContent=o?'접기':'더보기';};
+ q('.bAddItem').onclick=()=>openEditor(S,null,null,V[S.id].IDX[todayStr]!=null?todayStr:S.start+'-01');
+ q('.bView').onclick=()=>{S.view=viewOf(S)==='list'?'table':'list';persist();applyView(S);};
+ q('.bToday').onclick=()=>{if(V[S.id].IDX[todayStr]==null){toast('오늘이 기간 안에 없습니다');return;}if(viewOf(S)==='list'){const g=q('.list .lg.today');if(g)g.scrollIntoView({behavior:'smooth',block:'center'});else toast('오늘 일정이 없습니다');}else scrollToDate(S,todayStr,true);};
  q('.bXls').onclick=()=>exportXlsx([S],safe(S.title)+'.xlsx');
  q('.bShare').onclick=e=>openShareMenu(S,e.currentTarget);
  q('.bDup').onclick=()=>{const c=JSON.parse(JSON.stringify(S));c.id=uid();c.tasks.forEach(t=>{t.id=uid();t.items.forEach(i=>i.id=uid());});
@@ -297,12 +356,12 @@ function makeBoard(S){
  q('.grid').addEventListener('click',e=>{
   const it=e.target.closest('.it');
   if(it){ // 옆 칸으로 넘친 글자 위를 눌렀으면 그 날짜에 새 일정 입력
-   const r=it.getBoundingClientRect(); const off=Math.floor((e.clientX-r.left)/34);
+   const r=it.getBoundingClientRect(); const off=Math.floor((e.clientX-r.left)/CW());
    if(it.classList.contains('point')&&off>0){const base=S.tasks.find(t=>t.id===it.dataset.task).items.find(x=>x.id===it.dataset.item); const d=parse(base.date); d.setDate(d.getDate()+off); openEditor(S,it.dataset.task,null,fmt(d)); return;}
    openEditor(S,it.dataset.task,it.dataset.item);return;}
   const d=e.target.closest('.d'); if(d)openEditor(S,d.dataset.task,null,d.dataset.date);
  });
- renderGrid(S);
+ renderGrid(S); applyView(S);
  requestAnimationFrame(()=>scrollToDate(S,V[S.id].IDX[todayStr]!=null?todayStr:firstItemDate(S)));
  return el;
 }
@@ -340,22 +399,53 @@ function renderGrid(S){
  });
  grid.innerHTML=''; grid.appendChild(frag);
  v.el.querySelector('.bnum').textContent=S.tasks.length+'개 항목 · '+S.tasks.reduce((a,t)=>a+t.items.length,0)+'건 일정';
- renderMonthTabs(S);
+ renderMonthTabs(S); if(viewOf(S)==='list')renderList(S);
+}
+/* 보기 방식: 폰은 목록, PC는 표 (표마다 직접 바꿀 수 있음) */
+function viewOf(S){return S.view||(isPhone()?'list':'table');}
+function applyView(S){
+ const v=V[S.id]; const list=viewOf(S)==='list';
+ v.el.querySelector('.wrap').hidden=list; v.el.querySelector('.list').hidden=!list; v.el.querySelector('.mtabs').hidden=list;
+ v.el.querySelector('.bView').textContent=list?'표 보기':'목록 보기';
+ if(list)renderList(S); else requestAnimationFrame(()=>scrollToDate(S,v.IDX[todayStr]!=null?todayStr:firstItemDate(S)));
+}
+window.matchMedia('(max-width:640px)').addEventListener('change',()=>{DOC.boards.forEach(S=>{if(!S.view)applyView(S);});});
+function renderList(S){
+ const v=V[S.id]; const box=v.el.querySelector('.list'); box.innerHTML='';
+ const evs=[]; S.tasks.forEach((t,ti)=>t.items.forEach(it=>{if(it.date>=S.start+'-01'&&it.date<=S.end+'-31')evs.push({t,ti,it});}));
+ evs.sort((a,b)=>a.it.date<b.it.date?-1:a.it.date>b.it.date?1:a.ti-b.ti);
+ if(!evs.length){const e=document.createElement('div');e.className='lempty';e.textContent='아직 일정이 없습니다. 위의 "일정 추가"를 눌러 넣어 보세요.';box.appendChild(e);return;}
+ const groups=[]; evs.forEach(e=>{const g=groups[groups.length-1];if(g&&g.date===e.it.date)g.list.push(e);else groups.push({date:e.it.date,list:[e]});});
+ const fmtD=s=>{const d=parse(s);return (d.getMonth()+1)+'.'+d.getDate()+'('+WD[d.getDay()]+')';};
+ let prevM='';
+ groups.forEach(g=>{
+  const d=parse(g.date); const m=g.date.slice(0,7);
+  if(m!==prevM){const mh=document.createElement('div');mh.className='hint';mh.style.cssText='padding:8px 0 2px 52px;font-weight:700;color:#7A5C3A';mh.textContent=(d.getFullYear()!==parse(S.start).getFullYear()||d.getMonth()===0?d.getFullYear()+'년 ':'')+(d.getMonth()+1)+'월';box.appendChild(mh);prevM=m;}
+  const row=document.createElement('div'); row.className='lg'+(g.date===todayStr?' today':'');
+  const ld=document.createElement('div'); ld.className='ld'+(d.getDay()===0?' sun':d.getDay()===6?' sat':'')+(g.date===todayStr?' today':'');
+  ld.innerHTML='<b>'+d.getDate()+'</b><i>'+WD[d.getDay()]+'</i>'+(g.date===todayStr?'<em>오늘</em>':'');
+  const lc=document.createElement('div'); lc.className='lc';
+  g.list.forEach(({t,ti,it})=>{const c=document.createElement('button'); c.type='button'; c.className='card c-'+it.color; c.style.setProperty('--sw',SWATCH[ti%SWATCH.length]);
+   const nm=document.createElement('div'); nm.className='nm'; nm.textContent=t.name||(ti+1)+'번 항목';
+   if(it.end){const rg=document.createElement('span');rg.className='rg';rg.textContent='~ '+fmtD(it.end);nm.appendChild(rg);}
+   const tx=document.createElement('div'); tx.className='tx'; tx.textContent=it.text;
+   c.append(nm,tx); c.onclick=()=>openEditor(S,t.id,it.id); lc.appendChild(c);});
+  row.append(ld,lc); box.appendChild(row);});
 }
 function monLabel(DAYS,i){return (DAYS[i].y!==DAYS[0].y||DAYS[i].m===1?DAYS[i].y+'.':'')+DAYS[i].m+'월';}
 function renderMonthTabs(S){
  const v=V[S.id]; const box=v.el.querySelector('.mtabs'); box.innerHTML='';
  let i=0; while(i<v.DAYS.length){let j=i;while(j<v.DAYS.length&&v.DAYS[j].m===v.DAYS[i].m&&v.DAYS[j].y===v.DAYS[i].y)j++;
   const b=document.createElement('button'); b.type='button'; b.className='mt'; b.dataset.i=i; b.textContent=monLabel(v.DAYS,i);
-  const at=i; b.onclick=()=>{v.el.querySelector('.wrap').scrollTo({left:at*34,behavior:'smooth'});}; box.appendChild(b); i=j;}
+  const at=i; b.onclick=()=>{v.el.querySelector('.wrap').scrollTo({left:at*CW(),behavior:'smooth'});}; box.appendChild(b); i=j;}
  markMonthTab(S);
 }
 function markMonthTab(S){
- const v=V[S.id]; if(!v)return; const i=Math.round(v.el.querySelector('.wrap').scrollLeft/34); const d=v.DAYS[Math.min(Math.max(i,0),v.DAYS.length-1)]; if(!d)return;
+ const v=V[S.id]; if(!v)return; const i=Math.round(v.el.querySelector('.wrap').scrollLeft/CW()); const d=v.DAYS[Math.min(Math.max(i,0),v.DAYS.length-1)]; if(!d)return;
  [...v.el.querySelectorAll('.mt')].forEach(b=>{const s=v.DAYS[+b.dataset.i];b.classList.toggle('on',s.m===d.m&&s.y===d.y);});
 }
 function firstItemDate(S){let m=null;S.tasks.forEach(t=>t.items.forEach(i=>{if(V[S.id].IDX[i.date]!=null&&(m===null||i.date<m))m=i.date;}));return m;}
-function scrollToDate(S,d,smooth){const i=d?V[S.id].IDX[d]:null;if(i==null)return;const w=V[S.id].el.querySelector('.wrap');const left=Math.max(0,(i-3)*34);if(smooth)w.scrollTo({left,behavior:'smooth'});else w.scrollLeft=left;}
+function scrollToDate(S,d,smooth){const i=d?V[S.id].IDX[d]:null;if(i==null)return;const w=V[S.id].el.querySelector('.wrap');const left=Math.max(0,(i-3)*CW());if(smooth)w.scrollTo({left,behavior:'smooth'});else w.scrollLeft=left;}
 function move(S,i,dir){const j=i+dir;if(j<0||j>=S.tasks.length)return;[S.tasks[i],S.tasks[j]]=[S.tasks[j],S.tasks[i]];persist();renderGrid(S);}
 function delRow(S,i){const t=S.tasks[i];if(t.items.length&&!confirm('"'+(t.name||'(이름 없음)')+'" 행과 일정 '+t.items.length+'건을 삭제할까요?'))return;S.tasks.splice(i,1);if(!S.tasks.length)S.tasks.push({id:uid(),name:'',items:[]});persist();renderGrid(S);}
 function addRow(S,at){const t={id:uid(),name:'',items:[]};if(at==null)S.tasks.push(t);else S.tasks.splice(at,0,t);persist();renderGrid(S);
@@ -378,10 +468,12 @@ function closeRowMenu(){if(RM){RM.remove();RM=null;}}
 /* ===================== 편집기 ===================== */
 let ED=null;
 function openEditor(S,taskId,itemId,date){
- const t=S.tasks.find(x=>x.id===taskId); if(!t) return;
- const it=itemId?t.items.find(x=>x.id===itemId):null;
+ let t=S.tasks.find(x=>x.id===taskId)||null;
+ const it=t&&itemId?t.items.find(x=>x.id===itemId):null;
+ const sel=$('edTaskSel'); sel.innerHTML=''; S.tasks.forEach((x,i)=>{const o=document.createElement('option');o.value=x.id;o.textContent=(i+1)+'. '+(x.name||'항목명 없음');sel.appendChild(o);});
+ $('edTaskWrap').hidden=!!t; if(!t){sel.value=(S._lastTask&&S.tasks.some(x=>x.id===S._lastTask))?S._lastTask:S.tasks[0].id;}
  ED={board:S,task:t,item:it};
- $('edTask').textContent=t.name?t.name:(S.tasks.indexOf(t)+1)+'번 행';
+ $('edTask').textContent=t?(t.name?t.name:(S.tasks.indexOf(t)+1)+'번 행'):'';
  $('edDate').value=it?it.date:date; $('edEnd').value=it&&it.end?it.end:''; $('edText').value=it?it.text:'';
  setChip(it?it.color:'none'); $('edDelete').hidden=!it;
  $('ovl').hidden=false; setTimeout(()=>$('edText').focus(),30);
@@ -393,6 +485,7 @@ function saveEditor(){
  if(!date){toast('시작일을 입력하세요');return;}
  if(!text){if(ED.item)deleteItem();else closeEditor();return;}
  const end=endv&&endv>date?endv:undefined;
+ if(!ED.task){ED.task=S.tasks.find(x=>x.id===$('edTaskSel').value)||S.tasks[0]; S._lastTask=ED.task.id;}
  if(ED.item){Object.assign(ED.item,{date,end,text,color:ED.color});}
  else ED.task.items.push({id:uid(),date,end,text,color:ED.color});
  if(date<S.start+'-01'||date>S.end+'-31')toast('기간 밖의 날짜라 표에는 보이지 않습니다');
@@ -411,6 +504,7 @@ document.addEventListener('keydown',e=>{
 
 /* ===================== 상단 바 ===================== */
 function addBoard(b,msg){DOC.boards.push(b);persist();const el=makeBoard(b);$('boards').appendChild(el);el.scrollIntoView({behavior:'smooth',block:'start'});const t=el.querySelector('.title');setTimeout(()=>t.focus(),300);if(msg!==false)toast(msg||'새 표가 추가됐습니다. 프로젝트명을 입력하세요');}
+$('btnMore').onclick=()=>{const o=$('gMore').classList.toggle('open');$('btnMore').setAttribute('aria-expanded',o);$('btnMore').textContent=o?'접기':'더보기';};
 $('btnAdd').onclick=()=>addBoard(blank()); $('btnAdd2').onclick=()=>addBoard(blank());
 $('btnPrint').onclick=()=>window.print();
 $('btnJson').onclick=()=>download(new Blob([JSON.stringify(DOC,null,1)],{type:'application/json'}),'일정표 저장파일.json');
