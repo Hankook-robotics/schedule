@@ -104,6 +104,7 @@ button.danger{color:var(--bad)}
 .card.c-blue .tx{background:var(--c-blue);color:var(--t-blue)}.card.c-green .tx{background:var(--c-green);color:var(--t-green)}.card.c-yellow .tx{background:var(--c-yellow);color:var(--t-yellow)}
 .card.c-orange .tx{background:var(--c-orange);color:var(--t-orange)}.card.c-red .tx{background:var(--c-red);color:var(--t-red)}.card.c-purple .tx{background:var(--c-purple);color:var(--t-purple)}
 .lempty{padding:28px 10px;text-align:center;color:var(--ink3);font-size:13px;position:relative;z-index:1;background:var(--panel)}
+.ed input[type=text]{border:1px solid var(--line);border-radius:12px;padding:9px 12px;background:var(--panel2);width:100%;color:var(--ink)}
 .ed select{border:1px solid var(--line);border-radius:12px;padding:9px 12px;background:var(--panel2);width:100%;color:var(--ink)}
 /* ---------- 보드 ---------- */
 .wrap{overflow:auto;position:relative;margin:0;max-height:70vh;background:var(--panel);border-radius:18px;box-shadow:var(--shadow)}
@@ -285,6 +286,14 @@ button.danger{color:var(--bad)}
  <div class="tip" id="tTip" role="dialog" aria-modal="true">
   <div class="st" id="tStep"></div><b id="tTitle"></b><div id="tText"></div>
   <div class="act"><button type="button" class="skip" id="tSkip">건너뛰기</button><button type="button" id="tPrev">이전</button><button type="button" class="pri" id="tNext">다음</button></div>
+ </div>
+</div>
+<div class="ovl" id="sovl" hidden>
+ <div class="ed" role="dialog" aria-modal="true" aria-labelledby="sTitle">
+  <h3 id="sTitle">다른 이름으로 저장</h3>
+  <label>파일 이름<span class="ym"><input id="sName" type="text" autocomplete="off"><span id="sExt" class="hint" style="align-self:center;white-space:nowrap"></span></span></label>
+  <div class="hint" id="sInfo">이 브라우저는 저장 위치 선택창을 지원하지 않아 기본 다운로드 폴더에 저장됩니다. 크롬 설정의 "다운로드 전에 각 파일의 저장 위치 확인"을 켜면 위치도 고를 수 있습니다.</div>
+  <div class="act"><button id="sCancel" type="button">취소</button><button id="sSave" type="button" class="pri">저장</button></div>
  </div>
 </div>
 <div class="ovl" id="rovl" hidden>
@@ -577,7 +586,7 @@ $('btnMore').onclick=()=>{const o=$('gMore').classList.toggle('open');$('btnMore
 $('btnTour').onclick=()=>{$('gMore').classList.remove('open');startTour();};
 $('btnAdd').onclick=()=>addBoard(blank()); $('btnAdd2').onclick=()=>addBoard(blank());
 $('btnPrint').onclick=()=>window.print();
-$('btnJson').onclick=()=>download(new Blob([JSON.stringify(DOC,null,1)],{type:'application/json'}),'일정표 저장파일.json');
+$('btnJson').onclick=async()=>{const ok=await download(new Blob([JSON.stringify(DOC,null,1)],{type:'application/json'}),'일정표 저장파일.json'); if(ok&&!window.showSaveFilePicker)toast('다운로드 폴더에 저장했습니다');};
 $('btnJsonIn').onclick=()=>$('fileJson').click();
 $('fileJson').onchange=async e=>{const f=e.target.files[0];if(!f)return;
  try{const j=JSON.parse(await f.text()); const bs=(Array.isArray(j.boards)?j.boards:[j]).map(normalize); bs.forEach(b=>{b.id=uid();DOC.boards.push(b);}); persist(); renderAll(); toast(bs.length+'개 표를 아래에 추가했습니다');}
@@ -587,12 +596,31 @@ $('fileXls').onchange=async e=>{const f=e.target.files[0];if(!f)return;
  try{const s=await importXlsx(f);addBoard(s,'엑셀에서 '+s.tasks.length+'개 행을 새 표로 불러왔습니다');}
  catch(err){console.error(err);toast('불러오기 실패: '+err.message);}e.target.value='';};
 $('btnXlsAll').onclick=()=>{const bs=DOC.boards; const name=bs.length===1?safe(bs[0].title)+'.xlsx':'일정표.xlsx'; exportXlsx(bs,name);};
-function exportXlsx(boards,name){try{download(new Blob([buildXlsx(boards)],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}),name);toast('엑셀 파일을 저장했습니다');}catch(err){console.error(err);toast('엑셀 생성 실패: '+err.message);}}
+async function exportXlsx(boards,name){try{const ok=await download(new Blob([buildXlsx(boards)],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}),name); if(ok&&!window.showSaveFilePicker)toast('엑셀 파일을 다운로드 폴더에 저장했습니다');}catch(err){console.error(err);toast('엑셀 생성 실패: '+err.message);}}
 function safe(s){return (s||'일정표').replace(/[\\/:*?"<>|]/g,'_').trim()||'일정표'}
+const EXT_DESC={json:{d:'일정표 저장파일',m:'application/json'},xlsx:{d:'엑셀 파일',m:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'},png:{d:'그림 파일',m:'image/png'}};
 async function download(blob,name){
+ const ext=(name.match(/\.([a-z0-9]+)$/i)||[])[1]||'dat'; const base=name.replace(/\.[a-z0-9]+$/i,''); const info=EXT_DESC[ext]||{d:'파일',m:blob.type||'application/octet-stream'};
+ // 1) claude.ai 미리보기
  let dl=null; try{if(window.claude&&typeof window.claude.use==='function')dl=await window.claude.use('downloads');}catch(e){dl=null;}
- if(dl){try{await dl.save({filename:name,data:blob});}catch(err){if(err&&err.code!=='declined')toast('저장하지 못했습니다: '+(err.message||err.code));}return;}
- const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},1000);}
+ if(dl){try{await dl.save({filename:name,data:blob});return true;}catch(err){if(err&&err.code!=='declined')toast('저장하지 못했습니다: '+(err.message||err.code));return false;}}
+ // 2) 저장 위치 선택창 (크롬·엣지 PC)
+ if(window.showSaveFilePicker&&window.isSecureContext){
+  try{const h=await window.showSaveFilePicker({suggestedName:name,types:[{description:info.d,accept:{[info.m]:['.'+ext]}}]});
+   const w=await h.createWritable(); await w.write(blob); await w.close(); toast('저장했습니다: '+h.name); return true;}
+  catch(err){if(err&&err.name==='AbortError')return false; console.warn(err);/* 미지원·실패 시 아래로 */}
+ }
+ // 3) 파일명만 묻고 다운로드
+ const fname=await askFileName(base,ext); if(fname===null)return false;
+ const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=fname+'.'+ext;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},1000); return true;
+}
+function askFileName(base,ext){
+ return new Promise(res=>{const ov=$('sovl'); $('sName').value=base; $('sExt').textContent='.'+ext; ov.hidden=false; setTimeout(()=>{$('sName').focus();$('sName').select();},30);
+  const done=v=>{ov.hidden=true; $('sSave').onclick=null; $('sCancel').onclick=null; ov.onclick=null; $('sName').onkeydown=null; res(v);};
+  const ok=()=>{const v=$('sName').value.replace(/[\\/:*?"<>|]/g,'_').trim(); if(!v){toast('파일 이름을 입력하세요');return;} done(v);};
+  $('sSave').onclick=ok; $('sCancel').onclick=()=>done(null); ov.onclick=e=>{if(e.target===ov)done(null);};
+  $('sName').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();ok();} if(e.key==='Escape')done(null);};});
+}
 let tt;function toast(m){const t=$('toast');t.textContent=m;t.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('on'),2200);}
 function status(m){$('status').textContent=m;}
 
@@ -906,7 +934,7 @@ async function shareImage(S,kind){
   const cv=kind==='list'?drawList(S):drawBoard(S); const blob=await new Promise(r=>cv.toBlob(r,'image/png')); if(!blob)throw new Error('그림 생성 실패');
   const name=safe(S.title)+(kind==='list'?' 목록':'')+'.png';
   if(navigator.canShare){const file=new File([blob],name,{type:'image/png'}); if(navigator.canShare({files:[file]})){try{await navigator.share({files:[file],title:S.title||'일정표'});return;}catch(e){if(e&&e.name==='AbortError')return;}}}
-  await download(blob,name); toast('이미지를 저장했습니다. 저장된 그림을 보내세요');
+  const ok=await download(blob,name); if(ok&&!window.showSaveFilePicker)toast('이미지를 저장했습니다. 저장된 그림을 보내세요');
  }catch(err){console.error(err);toast('이미지를 만들지 못했습니다: '+err.message);}
 }
 
