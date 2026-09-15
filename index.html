@@ -979,7 +979,7 @@ function tourSteps(){
 function startTour(){
  closeRowMenu(); TOUR.steps=tourSteps(); if(!TOUR.steps.length)return; TOUR.i=0; $('tour').hidden=false; showStep();
 }
-function endTour(){$('tour').hidden=true; ls.set('schb_tour','1'); window.removeEventListener('resize',placeStep);}
+function endTour(){$('tour').hidden=true; window.removeEventListener('resize',placeStep);}
 function showStep(){
  const st=TOUR.steps[TOUR.i]; if(!st){endTour();return;}
  $('tStep').textContent=(TOUR.i+1)+' / '+TOUR.steps.length; $('tTitle').textContent=st.title; $('tText').textContent=st.text;
@@ -1000,7 +1000,7 @@ $('tNext').onclick=()=>{TOUR.i++;showStep();}; $('tPrev').onclick=()=>{TOUR.i=Ma
 document.addEventListener('keydown',e=>{if($('tour').hidden)return; if(e.key==='Escape')endTour(); if(e.key==='ArrowRight'||e.key==='Enter'){TOUR.i++;showStep();} if(e.key==='ArrowLeft'){TOUR.i=Math.max(0,TOUR.i-1);showStep();}});
 /* ===================== 시작 ===================== */
 load(); renderAll(); receiveShared();
-if(!ls.get('schb_tour')){setTimeout(()=>startTour(),600);}
+setTimeout(()=>startTour(),600); // 열 때마다 화면 안내 표시 (건너뛰기 가능)
 </script>
 </body>
 </html>
