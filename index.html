@@ -105,7 +105,9 @@ button.danger{color:var(--bad)}
 .card.c-orange .tx{background:var(--c-orange);color:var(--t-orange)}.card.c-red .tx{background:var(--c-red);color:var(--t-red)}.card.c-purple .tx{background:var(--c-purple);color:var(--t-purple)}
 .lempty{padding:28px 10px;text-align:center;color:var(--ink3);font-size:13px;position:relative;z-index:1;background:var(--panel)}
 .ed.help{width:min(600px,100%)}
-.hbody{overflow:auto;max-height:60vh;padding-right:4px;display:flex;flex-direction:column;gap:14px}
+.hbody{display:flex;flex-direction:column;gap:14px;-webkit-overflow-scrolling:touch}
+.ed.help{max-height:92%}
+.ed.help .act{position:sticky;bottom:-18px;background:var(--panel);padding:10px 0 4px;margin-bottom:-4px}
 .hbody section h4{margin:0 0 6px;font-size:14px;font-weight:800;color:var(--ink)}
 .hbody ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:5px}
 .hbody li{font-size:13.5px;line-height:1.55;color:var(--ink2)}
