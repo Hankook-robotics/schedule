@@ -96,9 +96,11 @@ button.danger{color:var(--bad)}
 .ld em{display:block;font-style:normal;font-size:9.5px;background:var(--acc2);color:#fff;border-radius:99px;margin-top:3px;padding:1px 0}
 .ld.today b{color:#B45309}
 .lc{flex:1;display:flex;flex-direction:column;gap:6px;min-width:0}
-.card{background:var(--panel2);border-radius:12px;padding:9px 12px 9px 14px;border-left:4px solid var(--sw,#CFE3F7);cursor:pointer;text-align:left;width:100%;font:inherit;color:inherit}
+.card{background:var(--panel2);border-radius:12px;padding:9px 12px;border:1px solid var(--line2);cursor:pointer;text-align:left;width:100%;font:inherit;color:inherit}
 .card:hover{background:var(--line2)}
-.card .nm{font-size:11px;font-weight:700;color:var(--ink2);margin-bottom:2px;display:flex;justify-content:space-between;gap:6px}
+.card .nm{font-size:11px;font-weight:700;color:var(--ink2);margin-bottom:3px;display:flex;align-items:center;gap:6px}
+.card .nm .sw{width:8px;height:8px;border-radius:2px;background:var(--sw,#CFE3F7);flex:none}
+.card .nm .rg{margin-left:auto}
 .card .rg{font-weight:500;color:var(--ink3);white-space:nowrap}
 .card .tx{font-size:13.5px;font-weight:500;white-space:pre-wrap;word-break:break-word;display:inline-block;padding:3px 9px;border-radius:8px;background:var(--c-none);color:var(--t-none)}
 .card.c-blue .tx{background:var(--c-blue);color:var(--t-blue)}.card.c-green .tx{background:var(--c-green);color:var(--t-green)}.card.c-yellow .tx{background:var(--c-yellow);color:var(--t-yellow)}
@@ -426,7 +428,7 @@ function renderList(S){
   ld.innerHTML='<b>'+d.getDate()+'</b><i>'+WD[d.getDay()]+'</i>'+(g.date===todayStr?'<em>오늘</em>':'');
   const lc=document.createElement('div'); lc.className='lc';
   g.list.forEach(({t,ti,it})=>{const c=document.createElement('button'); c.type='button'; c.className='card c-'+it.color; c.style.setProperty('--sw',SWATCH[ti%SWATCH.length]);
-   const nm=document.createElement('div'); nm.className='nm'; nm.textContent=t.name||(ti+1)+'번 항목';
+   const nm=document.createElement('div'); nm.className='nm'; const sw=document.createElement('span'); sw.className='sw'; const nt=document.createElement('span'); nt.textContent=t.name||(ti+1)+'번 항목'; nm.append(sw,nt);
    if(it.end){const rg=document.createElement('span');rg.className='rg';rg.textContent='~ '+fmtD(it.end);nm.appendChild(rg);}
    const tx=document.createElement('div'); tx.className='tx'; tx.textContent=it.text;
    c.append(nm,tx); c.onclick=()=>openEditor(S,t.id,it.id); lc.appendChild(c);});
