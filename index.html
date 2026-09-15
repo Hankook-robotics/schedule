@@ -221,6 +221,7 @@ button.danger{color:var(--bad)}
   <button id="btnJsonIn" type="button">파일 불러오기</button>
   <button id="btnPrint" type="button">인쇄</button>
   <button id="btnTour" type="button">화면 안내 보기</button>
+  <button id="btnReset" type="button" class="danger">새로 만들기</button>
  </div>
  <input id="fileXls" type="file" accept=".xlsx" hidden>
  <input id="fileJson" type="file" accept=".json,application/json" hidden>
@@ -286,6 +287,13 @@ button.danger{color:var(--bad)}
  <div class="tip" id="tTip" role="dialog" aria-modal="true">
   <div class="st" id="tStep"></div><b id="tTitle"></b><div id="tText"></div>
   <div class="act"><button type="button" class="skip" id="tSkip">건너뛰기</button><button type="button" id="tPrev">이전</button><button type="button" class="pri" id="tNext">다음</button></div>
+ </div>
+</div>
+<div class="ovl" id="xovl" hidden>
+ <div class="ed" role="dialog" aria-modal="true" aria-labelledby="xTitle">
+  <h3 id="xTitle">새로 만들기</h3>
+  <div style="font-size:14px;line-height:1.55">지금 화면의 <b id="xCount"></b>가 모두 지워지고 빈 표 하나로 다시 시작합니다.<br>되돌릴 수 없습니다. 나중에 필요할 수 있으면 먼저 파일로 저장해 두세요.</div>
+  <div class="act"><button id="xCancel" type="button" class="left">취소</button><button id="xSaveFirst" type="button">파일 저장 후 초기화</button><button id="xReset" type="button" class="pri" style="background:var(--bad);border-color:var(--bad)">초기화</button></div>
  </div>
 </div>
 <div class="ovl" id="sovl" hidden>
@@ -574,6 +582,7 @@ $('edSave').onclick=saveEditor; $('edCancel').onclick=closeEditor; $('edDelete')
 $('ovl').addEventListener('click',e=>{if(e.target===$('ovl'))closeEditor();});
 document.addEventListener('keydown',e=>{
  if(e.key==='Escape')closeRowMenu();
+ if(e.key==='Escape'&&!$('xovl').hidden){$('xovl').hidden=true;}
  if(e.key==='Escape'&&!$('rovl').hidden){$('rovl').hidden=true;RB=null;}
  if($('ovl').hidden)return;
  if(e.key==='Escape')closeEditor();
@@ -583,6 +592,12 @@ document.addEventListener('keydown',e=>{
 /* ===================== 상단 바 ===================== */
 function addBoard(b,msg){DOC.boards.push(b);persist();const el=makeBoard(b);$('boards').appendChild(el);el.scrollIntoView({behavior:'smooth',block:'start'});const t=el.querySelector('.title');setTimeout(()=>t.focus(),300);if(msg!==false)toast(msg||'새 표가 추가됐습니다. 프로젝트명을 입력하세요');}
 $('btnMore').onclick=()=>{const o=$('gMore').classList.toggle('open');$('btnMore').setAttribute('aria-expanded',o);$('btnMore').textContent=o?'접기':'더보기';};
+$('btnReset').onclick=()=>{$('gMore').classList.remove('open');const n=DOC.boards.length, k=DOC.boards.reduce((a,b)=>a+b.tasks.reduce((c,t)=>c+t.items.length,0),0);$('xCount').textContent='표 '+n+'개, 일정 '+k+'건';$('xovl').hidden=false;};
+$('xCancel').onclick=()=>{$('xovl').hidden=true;};
+$('xovl').addEventListener('click',e=>{if(e.target===$('xovl'))$('xovl').hidden=true;});
+function resetAll(){DOC={boards:[blank()]}; flush(); renderAll(); window.scrollTo({top:0}); toast('새 일정표로 시작합니다'); setTimeout(()=>{const t=document.querySelector('.board .title'); if(t)t.focus();},200);}
+$('xReset').onclick=()=>{$('xovl').hidden=true; resetAll();};
+$('xSaveFirst').onclick=async()=>{$('xovl').hidden=true; const ok=await download(new Blob([JSON.stringify(DOC,null,1)],{type:'application/json'}),'일정표 저장파일.json'); if(ok)resetAll(); else toast('저장이 취소되어 초기화하지 않았습니다');};
 $('btnTour').onclick=()=>{$('gMore').classList.remove('open');startTour();};
 $('btnAdd').onclick=()=>addBoard(blank()); $('btnAdd2').onclick=()=>addBoard(blank());
 $('btnPrint').onclick=()=>window.print();
