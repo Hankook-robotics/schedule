@@ -46,9 +46,8 @@ button.danger{color:var(--bad)}
 .top input[type=text]:placeholder-shown{border-color:var(--acc2);background:var(--panel)}
 .top input[type=text]:focus{background:var(--panel);border-color:var(--acc2);outline:none}
 .thint{font-size:11px;color:var(--ink3);padding-left:1px}
-.mtabs{display:flex;gap:6px;flex-wrap:wrap}
-.mt{padding:6px 14px;font-size:12.5px}
-.mt.on{background:var(--acc);color:var(--bg);border-color:var(--acc)}
+.bRange{font-weight:600;color:var(--ink)}
+.ym{display:flex;gap:6px}.ym select{flex:1}
 .tools{padding:0 0 12px;display:flex;flex-wrap:wrap;gap:8px 10px;align-items:center}
 .tools .f{display:flex;align-items:center;gap:6px}
 .tools label{font-size:12px;color:var(--ink2);white-space:nowrap}
@@ -78,7 +77,6 @@ button.danger{color:var(--bad)}
  .more.open{display:flex;padding:8px 0 2px}
  .bnum{width:100%;margin-left:0}
  .wrap{max-height:none}
- .mtabs{gap:4px}.mt{padding:5px 10px;font-size:12px}
  .addrow .hint{white-space:normal;max-width:70vw}
  .ed .row{flex-direction:column;align-items:stretch}
  .tools .f{flex-wrap:wrap}
@@ -184,7 +182,7 @@ button.danger{color:var(--bad)}
 /* ---------- 인쇄 ---------- */
 @page{size:A3 landscape;margin:10mm}
 @media print{
- .gbar,.tools,.addrow,.addboard,.ovl,.toast,.rmenu,.thint,.mtabs,.list{display:none!important}
+ .gbar,.tools,.addrow,.addboard,.ovl,.toast,.rmenu,.thint,.bRange,.list{display:none!important}
  .wrap[hidden]{display:block!important}
  .top input[type=text]{border:none;padding:0;margin:0;font-size:20px}
  .board{margin:0 0 16px;page-break-inside:avoid}
@@ -222,7 +220,7 @@ button.danger{color:var(--bad)}
  <section class="board">
   <div class="top">
    <div class="tbox"><input class="title" type="text" placeholder="프로젝트명 입력" aria-label="프로젝트명" title="눌러서 프로젝트명 수정"><span class="thint">프로젝트명을 눌러 언제든 수정할 수 있습니다</span></div>
-   <div class="mtabs" aria-label="월 이동"></div>
+   <button class="bRange" type="button" title="표에 표시할 기간 설정">기간 설정</button>
   </div>
   <div class="tools">
    <button class="bAddItem pri" type="button">일정 추가</button>
@@ -230,7 +228,6 @@ button.danger{color:var(--bad)}
    <button class="bShare" type="button">공유</button>
    <button class="bMore moreBtn" type="button" aria-expanded="false">더보기</button>
    <div class="more">
-    <div class="f"><label>기간</label><input class="start" type="month" aria-label="시작 월"><span class="hint">부터</span><input class="end" type="month" aria-label="종료 월"><span class="hint">까지</span></div>
     <button class="bRow" type="button">행 추가</button>
     <button class="bToday" type="button">오늘</button>
     <button class="bDup" type="button">복제</button>
@@ -266,6 +263,20 @@ button.danger{color:var(--bad)}
    <button id="edDelete" type="button" class="danger left">삭제</button>
    <button id="edCancel" type="button">취소</button>
    <button id="edSave" type="button" class="pri">저장</button>
+  </div>
+ </div>
+</div>
+<div class="ovl" id="rovl" hidden>
+ <div class="ed" role="dialog" aria-modal="true" aria-labelledby="rTitle">
+  <h3 id="rTitle">기간 설정 <span id="rBoard"></span></h3>
+  <div class="row">
+   <label>시작 월<span class="ym"><select id="rSY" aria-label="시작 연도"></select><select id="rSM" aria-label="시작 월"></select></span></label>
+   <label>종료 월<span class="ym"><select id="rEY" aria-label="종료 연도"></select><select id="rEM" aria-label="종료 월"></select></span></label>
+  </div>
+  <div class="hint" id="rInfo"></div>
+  <div class="act">
+   <button id="rCancel" type="button">취소</button>
+   <button id="rSave" type="button" class="pri">적용</button>
   </div>
  </div>
 </div>
@@ -338,10 +349,9 @@ function makeBoard(S){
  const el=$('tplBoard').content.firstElementChild.cloneNode(true); el.dataset.b=S.id;
  const q=sel=>el.querySelector(sel);
  V[S.id]={el,DAYS:[],IDX:{}};
- q('.title').value=S.title; q('.start').value=S.start; q('.end').value=S.end;
+ q('.title').value=S.title;
  q('.title').addEventListener('input',e=>{S.title=e.target.value;persist();});
- q('.start').addEventListener('change',e=>{const v=e.target.value;if(!v)return;S.start=v;if(S.end<v){S.end=v;q('.end').value=v;}persist();renderGrid(S);});
- q('.end').addEventListener('change',e=>{const v=e.target.value;if(!v)return;S.end=v;if(S.start>v){S.start=v;q('.start').value=v;}persist();renderGrid(S);});
+ q('.bRange').onclick=()=>openRange(S);
  q('.bRow').onclick=()=>addRow(S); q('.bRow2').onclick=()=>addRow(S);
  q('.bMore').onclick=()=>{const m=q('.tools .more');const o=m.classList.toggle('open');q('.bMore').setAttribute('aria-expanded',o);q('.bMore').textContent=o?'접기':'더보기';};
  q('.bAddItem').onclick=()=>openEditor(S,null,null,V[S.id].IDX[todayStr]!=null?todayStr:S.start+'-01');
@@ -352,7 +362,6 @@ function makeBoard(S){
   const i=DOC.boards.indexOf(S); DOC.boards.splice(i+1,0,c); persist(); const n=makeBoard(c); el.after(n); n.scrollIntoView({behavior:'smooth',block:'start'}); const t=n.querySelector('.title'); setTimeout(()=>{t.focus();t.select();},300); toast('아래에 복제했습니다. 프로젝트명을 바꿔 주세요');};
  q('.bDel').onclick=()=>{if(!confirm('"'+(S.title||'프로젝트명 없음')+'" 표를 삭제할까요? 되돌릴 수 없습니다.'))return;
   DOC.boards=DOC.boards.filter(b=>b!==S); if(!DOC.boards.length)DOC.boards=[blank()]; persist(); renderAll();};
- q('.wrap').addEventListener('scroll',()=>markMonthTab(S),{passive:true});
  q('.grid').addEventListener('click',e=>{
   const it=e.target.closest('.it');
   if(it){ // 옆 칸으로 넘친 글자 위를 눌렀으면 그 날짜에 새 일정 입력
@@ -399,13 +408,13 @@ function renderGrid(S){
  });
  grid.innerHTML=''; grid.appendChild(frag);
  v.el.querySelector('.bnum').textContent=S.tasks.length+'개 항목 · '+S.tasks.reduce((a,t)=>a+t.items.length,0)+'건 일정';
- renderMonthTabs(S); if(viewOf(S)==='list')renderList(S);
+ renderRangeBtn(S); if(viewOf(S)==='list')renderList(S);
 }
 /* 보기 방식: 폰은 목록, PC는 표 (표마다 직접 바꿀 수 있음) */
 function viewOf(S){return S.view||(isPhone()?'list':'table');}
 function applyView(S){
  const v=V[S.id]; const list=viewOf(S)==='list';
- v.el.querySelector('.wrap').hidden=list; v.el.querySelector('.list').hidden=!list; v.el.querySelector('.mtabs').hidden=list;
+ v.el.querySelector('.wrap').hidden=list; v.el.querySelector('.list').hidden=!list;
  v.el.querySelector('.bView').textContent=list?'표 보기':'목록 보기';
  if(list)renderList(S); else requestAnimationFrame(()=>scrollToDate(S,v.IDX[todayStr]!=null?todayStr:firstItemDate(S)));
 }
@@ -433,17 +442,27 @@ function renderList(S){
   row.append(ld,lc); box.appendChild(row);});
 }
 function monLabel(DAYS,i){return (DAYS[i].y!==DAYS[0].y||DAYS[i].m===1?DAYS[i].y+'.':'')+DAYS[i].m+'월';}
-function renderMonthTabs(S){
- const v=V[S.id]; const box=v.el.querySelector('.mtabs'); box.innerHTML='';
- let i=0; while(i<v.DAYS.length){let j=i;while(j<v.DAYS.length&&v.DAYS[j].m===v.DAYS[i].m&&v.DAYS[j].y===v.DAYS[i].y)j++;
-  const b=document.createElement('button'); b.type='button'; b.className='mt'; b.dataset.i=i; b.textContent=monLabel(v.DAYS,i);
-  const at=i; b.onclick=()=>{v.el.querySelector('.wrap').scrollTo({left:at*CW(),behavior:'smooth'});}; box.appendChild(b); i=j;}
- markMonthTab(S);
+function renderRangeBtn(S){
+ const b=V[S.id].el.querySelector('.bRange'); const D=V[S.id].DAYS; if(!D.length)return;
+ const f=D[0], l=D[D.length-1]; b.textContent='기간 '+f.y+'.'+pad(f.m)+' ~ '+l.y+'.'+pad(l.m);
 }
-function markMonthTab(S){
- const v=V[S.id]; if(!v)return; const i=Math.round(v.el.querySelector('.wrap').scrollLeft/CW()); const d=v.DAYS[Math.min(Math.max(i,0),v.DAYS.length-1)]; if(!d)return;
- [...v.el.querySelectorAll('.mt')].forEach(b=>{const s=v.DAYS[+b.dataset.i];b.classList.toggle('on',s.m===d.m&&s.y===d.y);});
+/* 기간 설정 창 */
+let RB=null;
+function openRange(S){
+ RB=S; const [sy,sm]=S.start.split('-').map(Number), [ey,em]=S.end.split('-').map(Number);
+ const yNow=new Date().getFullYear(); const years=[]; for(let y=Math.min(sy,yNow)-2;y<=Math.max(ey,yNow)+3;y++)years.push(y);
+ const fill=(id,arr,val,fmtf)=>{const el=$(id);el.innerHTML='';arr.forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=fmtf(v);if(v===val)o.selected=true;el.appendChild(o);});};
+ const months=[1,2,3,4,5,6,7,8,9,10,11,12];
+ fill('rSY',years,sy,v=>v+'년'); fill('rSM',months,sm,v=>v+'월'); fill('rEY',years,ey,v=>v+'년'); fill('rEM',months,em,v=>v+'월');
+ $('rBoard').textContent=S.title||''; rangeInfo(); $('rovl').hidden=false;
 }
+function rangeVals(){return {s:$('rSY').value+'-'+pad($('rSM').value),e:$('rEY').value+'-'+pad($('rEM').value)};}
+function rangeInfo(){const {s,e}=rangeVals(); if(e<s){$('rInfo').textContent='종료 월이 시작 월보다 앞입니다';$('rInfo').style.color='var(--bad)';return;}
+ const n=(parse(e).getFullYear()-parse(s).getFullYear())*12+(parse(e).getMonth()-parse(s).getMonth())+1; $('rInfo').textContent='총 '+n+'개월이 표에 표시됩니다'+(n>12?' (12개월이 넘으면 표가 매우 길어집니다)':''); $('rInfo').style.color='';}
+['rSY','rSM','rEY','rEM'].forEach(id=>$(id).addEventListener('change',rangeInfo));
+$('rSave').onclick=()=>{const {s,e}=rangeVals(); if(e<s){toast('종료 월이 시작 월보다 앞입니다');return;} RB.start=s; RB.end=e; persist(); renderGrid(RB); applyView(RB); $('rovl').hidden=true; RB=null;};
+$('rCancel').onclick=()=>{$('rovl').hidden=true;RB=null;};
+$('rovl').addEventListener('click',e=>{if(e.target===$('rovl')){$('rovl').hidden=true;RB=null;}});
 function firstItemDate(S){let m=null;S.tasks.forEach(t=>t.items.forEach(i=>{if(V[S.id].IDX[i.date]!=null&&(m===null||i.date<m))m=i.date;}));return m;}
 function scrollToDate(S,d,smooth){const i=d?V[S.id].IDX[d]:null;if(i==null)return;const w=V[S.id].el.querySelector('.wrap');const left=Math.max(0,(i-3)*CW());if(smooth)w.scrollTo({left,behavior:'smooth'});else w.scrollLeft=left;}
 function move(S,i,dir){const j=i+dir;if(j<0||j>=S.tasks.length)return;[S.tasks[i],S.tasks[j]]=[S.tasks[j],S.tasks[i]];persist();renderGrid(S);}
@@ -497,6 +516,7 @@ $('edSave').onclick=saveEditor; $('edCancel').onclick=closeEditor; $('edDelete')
 $('ovl').addEventListener('click',e=>{if(e.target===$('ovl'))closeEditor();});
 document.addEventListener('keydown',e=>{
  if(e.key==='Escape')closeRowMenu();
+ if(e.key==='Escape'&&!$('rovl').hidden){$('rovl').hidden=true;RB=null;}
  if($('ovl').hidden)return;
  if(e.key==='Escape')closeEditor();
  if(e.key==='Enter'&&(e.ctrlKey||e.metaKey)){e.preventDefault();saveEditor();}
