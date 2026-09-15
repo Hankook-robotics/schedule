@@ -489,7 +489,7 @@ function renderRangeBtn(S){
 let RB=null;
 function openRange(S){
  RB=S; const [sy,sm]=S.start.split('-').map(Number), [ey,em]=S.end.split('-').map(Number);
- const yNow=new Date().getFullYear(); const years=[]; for(let y=Math.min(sy,yNow)-2;y<=Math.max(ey,yNow)+3;y++)years.push(y);
+ const yNow=new Date().getFullYear(); const years=[]; for(let y=Math.min(sy,yNow)-5;y<=Math.max(ey,yNow)+15;y++)years.push(y);
  const fill=(id,arr,val,fmtf)=>{const el=$(id);el.innerHTML='';arr.forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=fmtf(v);if(v===val)o.selected=true;el.appendChild(o);});};
  const months=[1,2,3,4,5,6,7,8,9,10,11,12];
  fill('rSY',years,sy,v=>v+'년'); fill('rSM',months,sm,v=>v+'월'); fill('rEY',years,ey,v=>v+'년'); fill('rEM',months,em,v=>v+'월');
