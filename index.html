@@ -920,10 +920,13 @@ function tourSteps(){
  ];
  if(list){
   steps.push({el:q('.bAddItem'),title:'일정 추가',text:'항목을 고르고 날짜와 내용을 적으면 목록에 들어갑니다. 이미 있는 일정은 카드를 눌러 고칩니다.'});
-  steps.push({el:q('.bView'),title:'표 보기',text:'표로 바꾸면 항목 이름을 적고, 날짜 칸을 눌러 바로 입력할 수 있습니다. 칸을 길게 누른 뒤 끌면 기간 일정이 됩니다.'});
+  steps.push({el:q('.bView'),title:'표 보기',text:'표로 바꾸면 항목 이름을 적고 날짜 칸을 눌러 바로 입력할 수 있습니다.'});
+  steps.push({el:q('.bView'),title:'끌어서 기간 입력',text:'표 보기에서 날짜 칸을 잠깐 길게 누른 뒤 옆으로 끌어 놓으면 시작일부터 종료일까지 한 번에 입력됩니다.'});
  }else{
   steps.push({el:q('.name input'),title:'항목명',text:'행마다 항목 이름을 적습니다. 예) 그리퍼 핑거, 수도공사'});
-  steps.push({el:q('.d[data-date="'+todayStr+'"]')||q('.d'),title:'날짜 칸',text:'칸을 한 번 누르면 하루 일정, 옆으로 끌어서 놓으면 기간 일정이 됩니다. 이미 적힌 일정은 눌러서 고칩니다.',row:true});
+  const c0=q('.d[data-date="'+todayStr+'"]')||q('.d'); const d4=c0?parse(c0.dataset.date):null; if(d4)d4.setDate(d4.getDate()+4); const c4=d4?q('.d[data-task="'+c0.dataset.task+'"][data-date="'+fmt(d4)+'"]'):null;
+  steps.push({el:c0,title:'하루 일정 입력',text:'날짜 칸을 한 번 누르면 그날 일정을 적는 창이 뜹니다. 이미 적힌 일정은 눌러서 고치거나 지웁니다.'});
+  steps.push({el:c0,el2:c4||c0,title:'끌어서 기간 입력',text:isPhone()?'칸을 잠깐 길게 누른 뒤 옆으로 끌어 놓으면 시작일과 종료일이 채워진 창이 뜹니다. 입력창에서 종료일을 직접 적어도 됩니다.':'시작 칸을 누른 채 옆으로 끌어 끝 칸에서 놓으면 시작일과 종료일이 채워진 창이 뜹니다. 뒤에서 앞으로 끌어도 됩니다.'});
   steps.push({el:q('.no'),title:'행 관리',text:'번호를 누르면 위아래 이동, 행 추가, 행 삭제가 나옵니다.'});
  }
  steps.push({el:q('.bShare'),title:'공유',text:'링크나 이미지로 다른 사람에게 보냅니다.'});
@@ -943,7 +946,8 @@ function showStep(){
  setTimeout(placeStep,320); window.addEventListener('resize',placeStep);
 }
 function placeStep(){
- const el=TOUR.target; if(!el||$('tour').hidden)return; const r=el.getBoundingClientRect(); const pad=6;
+ const el=TOUR.target; if(!el||$('tour').hidden)return; let r=el.getBoundingClientRect(); const pad=6;
+ const st=TOUR.steps[TOUR.i]; if(st&&st.el2&&st.el2!==el){const r2=st.el2.getBoundingClientRect(); const L=Math.min(r.left,r2.left),T=Math.min(r.top,r2.top),R=Math.max(r.right,r2.right),B=Math.max(r.bottom,r2.bottom); r={left:L,top:T,right:R,bottom:B,width:R-L,height:B-T};}
  const h=$('tHole'); h.style.left=(r.left-pad)+'px'; h.style.top=(r.top-pad)+'px'; h.style.width=(r.width+pad*2)+'px'; h.style.height=(r.height+pad*2)+'px';
  const tip=$('tTip'); const tw=tip.offsetWidth, th=tip.offsetHeight; const vw=window.innerWidth, vh=window.innerHeight;
  let top=r.bottom+pad+12; if(top+th>vh-12)top=Math.max(12,r.top-pad-12-th);
