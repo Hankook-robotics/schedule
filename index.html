@@ -201,9 +201,9 @@ button.danger{color:var(--bad)}
 <div class="gbar">
  <span class="brand">일정표 빌더</span>
  <button id="btnAdd" type="button" class="pri">표 추가</button>
+ <button id="btnXlsAll" type="button">엑셀 저장</button>
  <button id="btnMore" type="button" class="moreBtn" aria-expanded="false">더보기</button>
  <div class="more" id="gMore">
-  <button id="btnXlsAll" type="button">엑셀 저장 (전체)</button>
   <button id="btnXlsIn" type="button">엑셀 불러오기</button>
   <button id="btnJson" type="button">파일 저장</button>
   <button id="btnJsonIn" type="button">파일 불러오기</button>
@@ -228,7 +228,6 @@ button.danger{color:var(--bad)}
    <button class="bAddItem pri" type="button">일정 추가</button>
    <button class="bView" type="button">목록 보기</button>
    <button class="bShare" type="button">공유</button>
-   <button class="bXls" type="button">엑셀 저장</button>
    <button class="bMore moreBtn" type="button" aria-expanded="false">더보기</button>
    <div class="more">
     <div class="f"><label>기간</label><input class="start" type="month" aria-label="시작 월"><span class="hint">부터</span><input class="end" type="month" aria-label="종료 월"><span class="hint">까지</span></div>
@@ -348,7 +347,6 @@ function makeBoard(S){
  q('.bAddItem').onclick=()=>openEditor(S,null,null,V[S.id].IDX[todayStr]!=null?todayStr:S.start+'-01');
  q('.bView').onclick=()=>{S.view=viewOf(S)==='list'?'table':'list';persist();applyView(S);};
  q('.bToday').onclick=()=>{if(V[S.id].IDX[todayStr]==null){toast('오늘이 기간 안에 없습니다');return;}if(viewOf(S)==='list'){const g=q('.list .lg.today');if(g)g.scrollIntoView({behavior:'smooth',block:'center'});else toast('오늘 일정이 없습니다');}else scrollToDate(S,todayStr,true);};
- q('.bXls').onclick=()=>exportXlsx([S],safe(S.title)+'.xlsx');
  q('.bShare').onclick=e=>openShareMenu(S,e.currentTarget);
  q('.bDup').onclick=()=>{const c=JSON.parse(JSON.stringify(S));c.id=uid();c.tasks.forEach(t=>{t.id=uid();t.items.forEach(i=>i.id=uid());});
   const i=DOC.boards.indexOf(S); DOC.boards.splice(i+1,0,c); persist(); const n=makeBoard(c); el.after(n); n.scrollIntoView({behavior:'smooth',block:'start'}); const t=n.querySelector('.title'); setTimeout(()=>{t.focus();t.select();},300); toast('아래에 복제했습니다. 프로젝트명을 바꿔 주세요');};
@@ -518,7 +516,7 @@ $('btnXlsIn').onclick=()=>$('fileXls').click();
 $('fileXls').onchange=async e=>{const f=e.target.files[0];if(!f)return;
  try{const s=await importXlsx(f);addBoard(s,'엑셀에서 '+s.tasks.length+'개 행을 새 표로 불러왔습니다');}
  catch(err){console.error(err);toast('불러오기 실패: '+err.message);}e.target.value='';};
-$('btnXlsAll').onclick=()=>exportXlsx(DOC.boards,'일정표_전체.xlsx');
+$('btnXlsAll').onclick=()=>{const bs=DOC.boards; const name=bs.length===1?safe(bs[0].title)+'.xlsx':'일정표.xlsx'; exportXlsx(bs,name);};
 function exportXlsx(boards,name){try{download(new Blob([buildXlsx(boards)],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}),name);toast('엑셀 파일을 저장했습니다');}catch(err){console.error(err);toast('엑셀 생성 실패: '+err.message);}}
 function safe(s){return (s||'일정표').replace(/[\\/:*?"<>|]/g,'_').trim()||'일정표'}
 async function download(blob,name){
